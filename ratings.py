@@ -1,5 +1,7 @@
 """Restaurant rating lister."""
 
+import random
+
 
 def get_file_ratings(filename):
     """Adds restaurant and rating from user to ratings from file."""
@@ -15,7 +17,14 @@ def get_file_ratings(filename):
 
 
 def get_user_choice():
-    print "Enter 1 to see all ratings\n 2 to add a new restaurant\n 'q' to quit"
+    user_prompt = """
+    Choose from the following:
+    1 to see all ratings
+    2 to add a new restaurant
+    3 to update a rating
+    'q' to quit"""
+
+    print user_prompt
     user_choice = raw_input("> ")
 
     return user_choice
@@ -23,38 +32,50 @@ def get_user_choice():
 
 def execute_choice(choice, ratings):
     """Executes user choice"""
+
     if choice == "q":
-        return
+        exit()
+    elif choice == "1":
+        sort_ratings(ratings)
     elif choice == "2":
         get_user_ratings(ratings)
+        sort_ratings(ratings)
+    elif choice == "3":
+        update_rating(ratings)
+        sort_ratings(ratings)
+    else:
+        print "Invalid input."
+        choice = get_user_choice()
 
-    sort_ratings(ratings)
+
+def update_rating(ratings):
+    random_choice = random.choice(ratings.keys())
+    print "{} is rated at {}.".format(random_choice, ratings[random_choice])
+    get_user_ratings(ratings, random_choice)
 
 
-def get_user_ratings(file_ratings):
+def get_user_ratings(file_ratings, random_choice=None):
     """Adds user restaurant and rating"""
 
-    class Error(Exception):
-        """Base class for other exceptions"""
-        pass
+    user_restaurant = random_choice
 
-    class notInRange(Error):
-        """Raised when user_rating is smaller than 1 or bigger than 5"""
-        pass
+    while True:
+        try:
+            if not random_choice:
+                user_restaurant = raw_input("Please enter a restaurant: ")
+            user_rating = int(raw_input("Please enter the rating: "))
 
-    try:
-        user_restaurant = raw_input("Please enter a restaurant: ")
-        user_rating = int(raw_input("Please enter the rating: "))
+        except ValueError:
+            print "Rating must be a number between 1 and 5. Please try again."
+            continue
 
         if user_rating < 1 or user_rating > 5:
-            raise notInRange
-        file_ratings[user_restaurant] = user_rating
-    except notInRange:
-        print "Rating must be a number between 1 and 5. Please try again."
-        get_user_ratings(file_ratings)
-    except:
-        print "Rating must be a number between 1 and 5. Please try again."
-        get_user_ratings(file_ratings)
+            print "Rating must be a number between 1 and 5. Please try again."
+
+        else:
+            break
+
+    file_ratings[user_restaurant] = user_rating
 
 
 def sort_ratings(restaurants):
@@ -71,9 +92,11 @@ def show_ratings(filename):
 
     ratings = get_file_ratings(filename)
 
-    user_choice = get_user_choice()
+    while True:
 
-    execute_choice(user_choice, ratings)
+        user_choice = get_user_choice()
+
+        execute_choice(user_choice, ratings)
 
 
 show_ratings("scores.txt")
